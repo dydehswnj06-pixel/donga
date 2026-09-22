@@ -587,9 +587,8 @@
     <div class="recent-list" id="recentList"></div>
   </section>
 
-  <footer>
-    데이터 출처: 동행복권 로또 6/45 공식 사이트 · 1회(2002.12.07) ~ 1242회(2026.09.19), 총 1242개 회차<br>
-    실시간 회차가 추가되어도 이 페이지는 수집 시점 데이터를 사용합니다.
+  <footer id="footerText">
+    데이터 출처: 동행복권 로또 6/45 공식 사이트 · 데이터 불러오는 중…
   </footer>
 
 </div>
@@ -643,9 +642,14 @@
   }
 
   function renderMeta() {
+    var first = state.data[0];
     var last = state.data[state.data.length - 1];
     document.getElementById('metaChip').textContent =
       '최신 ' + last.round + '회 · ' + fmtDate(last.date) + ' 추첨 기준';
+    document.getElementById('footerText').innerHTML =
+      '데이터 출처: 동행복권 로또 6/45 공식 사이트 · ' + first.round + '회(' + fmtDate(first.date) + ') ~ ' +
+      last.round + '회(' + fmtDate(last.date) + '), 총 ' + state.data.length + '개 회차<br>' +
+      '실시간 회차가 추가되어도 이 페이지는 수집 시점 데이터를 사용합니다.';
   }
 
   function renderLegend() {
