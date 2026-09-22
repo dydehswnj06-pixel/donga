@@ -1,0 +1,910 @@
+<title>로또 넘버랩</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Gothic+A1:wght@700;900&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #f3f4f8;
+    --surface: #ffffff;
+    --surface-2: #e9ebf2;
+    --border: #d7dae5;
+    --text: #1b1e2b;
+    --text-secondary: #565a70;
+    --text-muted: #8a8ea3;
+    --accent: #2c3e9e;
+    --accent-ink: #ffffff;
+    --accent-soft: #e3e7fb;
+
+    --ball-1: #b87f00; /* 1-10 */
+    --ball-2: #3b62d6; /* 11-20 */
+    --ball-3: #d1443a; /* 21-30 */
+    --ball-4: #4c4a99; /* 31-40 */
+    --ball-5: #2e9b52; /* 41-45 */
+    --ball-1-ink: #1b1e2b;
+    --ball-2-ink: #ffffff;
+    --ball-3-ink: #ffffff;
+    --ball-4-ink: #ffffff;
+    --ball-5-ink: #ffffff;
+
+    --avg-line: #b8bccb;
+    --shadow: 0 1px 2px rgba(27,30,43,.06), 0 8px 24px -12px rgba(27,30,43,.18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15161c;
+      --surface: #1d1f29;
+      --surface-2: #262838;
+      --border: #33364a;
+      --text: #ededf4;
+      --text-secondary: #aeb1c4;
+      --text-muted: #787c93;
+      --accent: #8ca0ff;
+      --accent-ink: #14172c;
+      --accent-soft: #262c52;
+
+      --ball-1: #a97f1e;
+      --ball-2: #5f7bd9;
+      --ball-3: #d96256;
+      --ball-4: #8b87d6;
+      --ball-5: #3fa868;
+      --ball-1-ink: #14172c;
+      --ball-2-ink: #14172c;
+      --ball-3-ink: #14172c;
+      --ball-4-ink: #14172c;
+      --ball-5-ink: #14172c;
+
+      --avg-line: #454863;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.6);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #15161c;
+    --surface: #1d1f29;
+    --surface-2: #262838;
+    --border: #33364a;
+    --text: #ededf4;
+    --text-secondary: #aeb1c4;
+    --text-muted: #787c93;
+    --accent: #8ca0ff;
+    --accent-ink: #14172c;
+    --accent-soft: #262c52;
+
+    --ball-1: #a97f1e;
+    --ball-2: #5f7bd9;
+    --ball-3: #d96256;
+    --ball-4: #8b87d6;
+    --ball-5: #3fa868;
+    --ball-1-ink: #14172c;
+    --ball-2-ink: #14172c;
+    --ball-3-ink: #14172c;
+    --ball-4-ink: #14172c;
+    --ball-5-ink: #14172c;
+
+    --avg-line: #454863;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.6);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans KR', 'Noto Sans KR', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 28px 20px 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  /* ---------- Masthead ---------- */
+  .masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .wordmark {
+    font-family: 'Gothic A1', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    margin: 0;
+  }
+  .wordmark span { color: var(--accent); }
+  .masthead-sub {
+    margin: 4px 0 0;
+    color: var(--text-secondary);
+    font-size: 13.5px;
+  }
+  .meta-chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 12px;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Disclaimer ---------- */
+  .disclaimer {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .disclaimer strong { color: var(--text); }
+  .disclaimer .mark {
+    flex: none;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ---------- Card ---------- */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 22px;
+  }
+  .card h2 {
+    font-family: 'Gothic A1', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .card .hint {
+    margin: 0 0 16px;
+    color: var(--text-muted);
+    font-size: 12.5px;
+  }
+
+  /* ---------- Controls ---------- */
+  .control-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 16px;
+  }
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .control-label {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .pill-row {
+    display: flex;
+    gap: 6px;
+    background: var(--surface-2);
+    border-radius: 10px;
+    padding: 3px;
+  }
+  .pill {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 13px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .pill:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .pill[aria-pressed="true"] {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 1px 2px rgba(0,0,0,.12);
+    font-weight: 600;
+  }
+
+  .btn-primary {
+    appearance: none;
+    border: none;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-family: 'IBM Plex Sans KR', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 11px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .btn-primary:hover { filter: brightness(1.06); }
+  .btn-primary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn-primary:active { transform: translateY(1px); }
+
+  /* ---------- Tickets ---------- */
+  .tickets {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .ticket-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--surface-2);
+    border-radius: 10px;
+  }
+  .ticket-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-muted);
+    width: 18px;
+    flex: none;
+  }
+  .balls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .ball {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+    flex: none;
+  }
+  .ball.g1 { background: var(--ball-1); color: var(--ball-1-ink); }
+  .ball.g2 { background: var(--ball-2); color: var(--ball-2-ink); }
+  .ball.g3 { background: var(--ball-3); color: var(--ball-3-ink); }
+  .ball.g4 { background: var(--ball-4); color: var(--ball-4-ink); }
+  .ball.g5 { background: var(--ball-5); color: var(--ball-5-ink); }
+
+  .empty-tickets {
+    color: var(--text-muted);
+    font-size: 13px;
+    padding: 18px 4px;
+    text-align: center;
+  }
+
+  /* ---------- Stats ---------- */
+  .stats-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+
+  .chart-scroll {
+    overflow-x: auto;
+    padding-bottom: 6px;
+    margin: 0 -4px;
+  }
+  .chart-scroll svg { display: block; }
+
+  .bar { cursor: pointer; }
+  .bar-hit { fill: transparent; }
+  .bar-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9.5px;
+    fill: var(--text-muted);
+  }
+  .bar-label.hot { fill: var(--text); font-weight: 600; }
+  .axis-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9.5px;
+    fill: var(--text-muted);
+  }
+  .avg-line { stroke: var(--avg-line); stroke-width: 1; stroke-dasharray: 3 3; }
+  .avg-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    fill: var(--text-muted);
+  }
+
+  .tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: var(--text);
+    color: var(--bg);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    padding: 6px 9px;
+    border-radius: 6px;
+    white-space: nowrap;
+    transform: translate(-50%, -130%);
+    opacity: 0;
+    transition: opacity .1s;
+    z-index: 10;
+  }
+  .tooltip.show { opacity: 1; }
+
+  .chip-summary {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+  }
+  .chip-group h3 {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin: 0 0 8px;
+    font-weight: 600;
+  }
+  .chip-balls { display: flex; gap: 6px; }
+
+  /* ---------- Recent draws ---------- */
+  .recent-list {
+    display: flex;
+    flex-direction: column;
+    max-height: 480px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .recent-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .recent-row:last-child { border-bottom: none; }
+  .recent-row:nth-child(odd) { background: var(--surface-2); }
+  .recent-meta {
+    flex: none;
+    width: 92px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .recent-round {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+  .recent-date {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .recent-balls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .ball-sm {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+    flex: none;
+  }
+  .ball-sm.g1 { background: var(--ball-1); color: var(--ball-1-ink); }
+  .ball-sm.g2 { background: var(--ball-2); color: var(--ball-2-ink); }
+  .ball-sm.g3 { background: var(--ball-3); color: var(--ball-3-ink); }
+  .ball-sm.g4 { background: var(--ball-4); color: var(--ball-4-ink); }
+  .ball-sm.g5 { background: var(--ball-5); color: var(--ball-5-ink); }
+  .recent-plus {
+    color: var(--text-muted);
+    font-size: 12px;
+    flex: none;
+  }
+  .ball-sm.bonus {
+    background: var(--surface);
+    border: 1.5px dashed var(--text-muted);
+    color: var(--text);
+  }
+
+  .table-wrap { overflow-x: auto; }
+  table.stat-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 480px;
+  }
+  table.stat-table th, table.stat-table td {
+    text-align: left;
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  table.stat-table th {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  table.stat-table td.num { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
+  table.stat-table tr:last-child td { border-bottom: none; }
+
+  footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 12px;
+    padding-top: 8px;
+  }
+  footer a { color: var(--text-secondary); }
+
+  @media (max-width: 480px) {
+    .wrap { padding: 20px 16px 56px; }
+    .wordmark { font-size: 24px; }
+    .card { padding: 16px; }
+    .control-row { gap: 14px; }
+  }
+</style>
+
+<div class="wrap">
+
+  <div class="masthead">
+    <div>
+      <h1 class="wordmark">로또<span>넘버랩</span></h1>
+      <p class="masthead-sub">동행복권 로또 6/45 과거 당첨번호 통계 분석 &amp; 번호 생성기</p>
+    </div>
+    <div class="meta-chip" id="metaChip">데이터 불러오는 중…</div>
+  </div>
+
+  <div class="disclaimer">
+    <div class="mark">!</div>
+    <div>
+      <strong>로또는 완전 무작위 추첨</strong>이며, 과거 당첨번호는 다음 회차 결과에 어떠한 영향도 주지 않습니다.
+      이 페이지의 모든 통계와 번호 생성은 <strong>통계적 재미</strong>를 위한 것이며 당첨을 보장하거나 예측하지 않습니다.
+    </div>
+  </div>
+
+  <section class="card">
+    <h2>번호 생성기</h2>
+    <p class="hint">생성 방식과 게임 수를 고른 뒤 번호를 뽑아보세요.</p>
+
+    <div class="control-row">
+      <div class="control-group">
+        <span class="control-label">생성 방식</span>
+        <div class="pill-row" id="modeRow">
+          <button class="pill" data-mode="weighted" aria-pressed="true">통계 가중치</button>
+          <button class="pill" data-mode="uniform" aria-pressed="false">완전 무작위</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <span class="control-label">게임 수</span>
+        <div class="pill-row" id="gameCountRow">
+          <button class="pill" data-count="1" aria-pressed="true">1게임</button>
+          <button class="pill" data-count="5" aria-pressed="false">5게임 (A–E)</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="generateBtn">번호 생성</button>
+
+    <div class="tickets" id="tickets" style="margin-top:16px;">
+      <div class="empty-tickets">번호 생성 버튼을 눌러보세요.</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="stats-head">
+      <div>
+        <h2 style="margin-bottom:2px;">번호별 출현 빈도</h2>
+        <p class="hint" style="margin:0;" id="statsHint">전체 회차 기준</p>
+      </div>
+      <div class="control-group">
+        <span class="control-label">집계 범위</span>
+        <div class="pill-row" id="windowRow">
+          <button class="pill" data-window="all" aria-pressed="true">전체 1242회</button>
+          <button class="pill" data-window="100" aria-pressed="false">최근 100회</button>
+          <button class="pill" data-window="50" aria-pressed="false">최근 50회</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend" id="legend"></div>
+
+    <div class="chart-scroll" style="margin-top:12px;">
+      <svg id="chart" width="900" height="220" viewBox="0 0 900 220"></svg>
+    </div>
+
+    <div class="chip-summary">
+      <div class="chip-group">
+        <h3>가장 많이 나온 번호 TOP 6</h3>
+        <div class="chip-balls" id="hotChips"></div>
+      </div>
+      <div class="chip-group">
+        <h3>가장 적게 나온 번호 BOTTOM 6</h3>
+        <div class="chip-balls" id="coldChips"></div>
+      </div>
+    </div>
+
+    <details style="margin-top:18px;">
+      <summary style="cursor:pointer; color:var(--text-secondary); font-size:13px;">전체 번호 표로 보기</summary>
+      <div class="table-wrap" style="margin-top:10px;">
+        <table class="stat-table" id="statTable">
+          <thead>
+            <tr><th>번호</th><th>출현 횟수</th><th>순위</th><th>최근 출현</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+
+  <section class="card">
+    <div class="stats-head">
+      <div>
+        <h2 style="margin-bottom:2px;">최근 나온 로또 번호</h2>
+        <p class="hint" style="margin:0;" id="recentHint">최근 50회</p>
+      </div>
+    </div>
+    <div class="recent-list" id="recentList"></div>
+  </section>
+
+  <footer>
+    데이터 출처: 동행복권 로또 6/45 공식 사이트 · 1회(2002.12.07) ~ 1242회(2026.09.19), 총 1242개 회차<br>
+    실시간 회차가 추가되어도 이 페이지는 수집 시점 데이터를 사용합니다.
+  </footer>
+
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+(function () {
+  var state = {
+    data: null,
+    windowSize: 'all',
+    mode: 'weighted',
+    gameCount: 1
+  };
+
+  var GROUP_NAMES = ['1–10', '11–20', '21–30', '31–40', '41–45'];
+
+  function groupOf(n) {
+    if (n <= 10) return 1;
+    if (n <= 20) return 2;
+    if (n <= 30) return 3;
+    if (n <= 40) return 4;
+    return 5;
+  }
+
+  function fmtDate(yyyymmdd) {
+    return yyyymmdd.slice(0,4) + '.' + yyyymmdd.slice(4,6) + '.' + yyyymmdd.slice(6,8);
+  }
+
+  function currentWindowData() {
+    if (state.windowSize === 'all') return state.data;
+    var n = Number(state.windowSize);
+    return state.data.slice(-n);
+  }
+
+  function computeFreq(rows) {
+    var counts = new Array(46).fill(0);
+    var lastRound = new Array(46).fill(null);
+    rows.forEach(function (r) {
+      r.numbers.forEach(function (n) {
+        counts[n]++;
+      });
+    });
+    // last-appeared uses full history regardless of window, more meaningful
+    state.data.forEach(function (r) {
+      r.numbers.forEach(function (n) {
+        lastRound[n] = r.round;
+      });
+    });
+    return { counts: counts, lastRound: lastRound };
+  }
+
+  function renderMeta() {
+    var last = state.data[state.data.length - 1];
+    document.getElementById('metaChip').textContent =
+      '최신 ' + last.round + '회 · ' + fmtDate(last.date) + ' 추첨 기준';
+  }
+
+  function renderLegend() {
+    var el = document.getElementById('legend');
+    el.innerHTML = GROUP_NAMES.map(function (name, i) {
+      return '<span class="legend-item"><span class="legend-swatch" style="background:var(--ball-' + (i+1) + ')"></span>' + name + '</span>';
+    }).join('');
+  }
+
+  var tooltipEl = document.getElementById('tooltip');
+  function showTooltip(evt, text) {
+    tooltipEl.textContent = text;
+    tooltipEl.style.left = evt.clientX + 'px';
+    tooltipEl.style.top = evt.clientY + 'px';
+    tooltipEl.classList.add('show');
+  }
+  function hideTooltip() { tooltipEl.classList.remove('show'); }
+
+  function renderChart(counts, lastRound, rowsLength) {
+    var svgNS = 'http://www.w3.org/2000/svg';
+    var svg = document.getElementById('chart');
+    svg.innerHTML = '';
+
+    var barW = 14, gap = 6, slot = barW + gap;
+    var chartW = 45 * slot + 20;
+    var chartH = 220;
+    var padTop = 16, padBottom = 30;
+    var plotH = chartH - padTop - padBottom;
+
+    svg.setAttribute('width', chartW);
+    svg.setAttribute('viewBox', '0 0 ' + chartW + ' ' + chartH);
+
+    var max = Math.max.apply(null, counts.slice(1));
+    var avg = counts.slice(1).reduce(function (a,b) { return a+b; }, 0) / 45;
+
+    function y(v) { return padTop + plotH - (v / max) * plotH; }
+
+    // average reference line
+    var avgY = y(avg);
+    var avgLine = document.createElementNS(svgNS, 'line');
+    avgLine.setAttribute('x1', 4); avgLine.setAttribute('x2', chartW - 4);
+    avgLine.setAttribute('y1', avgY); avgLine.setAttribute('y2', avgY);
+    avgLine.setAttribute('class', 'avg-line');
+    svg.appendChild(avgLine);
+
+    var avgLabel = document.createElementNS(svgNS, 'text');
+    avgLabel.setAttribute('x', chartW - 6);
+    avgLabel.setAttribute('y', avgY - 4);
+    avgLabel.setAttribute('text-anchor', 'end');
+    avgLabel.setAttribute('class', 'avg-label');
+    avgLabel.textContent = '평균 ' + avg.toFixed(1) + '회';
+    svg.appendChild(avgLabel);
+
+    var ranked = [];
+    for (var n = 1; n <= 45; n++) ranked.push({ n: n, c: counts[n] });
+    var sorted = ranked.slice().sort(function (a,b) { return b.c - a.c; });
+    var hotSet = {}, coldSet = {};
+    sorted.slice(0,3).forEach(function (r) { hotSet[r.n] = true; });
+    sorted.slice(-3).forEach(function (r) { coldSet[r.n] = true; });
+
+    for (var n = 1; n <= 45; n++) {
+      var x = 10 + (n-1) * slot;
+      var c = counts[n];
+      var h = (c / max) * plotH;
+      var barY = padTop + plotH - h;
+      var group = groupOf(n);
+
+      var hit = document.createElementNS(svgNS, 'rect');
+      hit.setAttribute('x', x - gap/2);
+      hit.setAttribute('y', padTop);
+      hit.setAttribute('width', barW + gap);
+      hit.setAttribute('height', plotH);
+      hit.setAttribute('class', 'bar-hit');
+      hit.addEventListener('mousemove', (function (n, c) {
+        return function (evt) {
+          var last = lastRound[n];
+          var ago = state.data[state.data.length-1].round - last;
+          showTooltip(evt, n + '번 · ' + c + '회 출현' + (ago === 0 ? ' · 직전 회차 포함' : ' · ' + ago + '회 전 최근 출현'));
+        };
+      })(n, c));
+      hit.addEventListener('mouseleave', hideTooltip);
+      svg.appendChild(hit);
+
+      var bar = document.createElementNS(svgNS, 'rect');
+      bar.setAttribute('x', x);
+      bar.setAttribute('y', barY);
+      bar.setAttribute('width', barW);
+      bar.setAttribute('height', Math.max(h, 2));
+      bar.setAttribute('rx', 4);
+      bar.setAttribute('fill', 'var(--ball-' + group + ')');
+      bar.setAttribute('class', 'bar');
+      svg.appendChild(bar);
+
+      if (hotSet[n] || coldSet[n]) {
+        var lbl = document.createElementNS(svgNS, 'text');
+        lbl.setAttribute('x', x + barW/2);
+        lbl.setAttribute('y', barY - 5);
+        lbl.setAttribute('text-anchor', 'middle');
+        lbl.setAttribute('class', 'bar-label hot');
+        lbl.textContent = c;
+        svg.appendChild(lbl);
+      }
+
+      if (n % 5 === 0 || n === 1) {
+        var axisLbl = document.createElementNS(svgNS, 'text');
+        axisLbl.setAttribute('x', x + barW/2);
+        axisLbl.setAttribute('y', chartH - 10);
+        axisLbl.setAttribute('text-anchor', 'middle');
+        axisLbl.setAttribute('class', 'axis-num');
+        axisLbl.textContent = n;
+        svg.appendChild(axisLbl);
+      }
+    }
+  }
+
+  function renderChips(counts) {
+    var ranked = [];
+    for (var n = 1; n <= 45; n++) ranked.push({ n: n, c: counts[n] });
+    var sorted = ranked.slice().sort(function (a,b) { return b.c - a.c; });
+    var hot = sorted.slice(0, 6);
+    var cold = sorted.slice(-6).reverse();
+
+    function ballsHtml(list) {
+      return list.map(function (r) {
+        return '<div class="ball g' + groupOf(r.n) + '" title="' + r.n + '번 · ' + r.c + '회">' + r.n + '</div>';
+      }).join('');
+    }
+    document.getElementById('hotChips').innerHTML = ballsHtml(hot);
+    document.getElementById('coldChips').innerHTML = ballsHtml(cold);
+  }
+
+  function renderTable(counts, lastRound) {
+    var ranked = [];
+    for (var n = 1; n <= 45; n++) ranked.push({ n: n, c: counts[n] });
+    var sorted = ranked.slice().sort(function (a,b) { return b.c - a.c; });
+    var latestRound = state.data[state.data.length-1].round;
+    var tbody = document.querySelector('#statTable tbody');
+    tbody.innerHTML = sorted.map(function (r, i) {
+      var ago = latestRound - lastRound[r.n];
+      var lastText = ago === 0 ? '직전 회차' : ago + '회 전';
+      return '<tr><td class="num">' + r.n + '</td><td class="num">' + r.c + '</td><td class="num">' + (i+1) + '</td><td>' + lastText + '</td></tr>';
+    }).join('');
+  }
+
+  function renderRecent() {
+    var n = 50;
+    var rows = state.data.slice(-n).slice().reverse();
+    document.getElementById('recentHint').textContent =
+      '최신 ' + rows[0].round + '회부터 최근 ' + rows.length + '개 회차';
+    var el = document.getElementById('recentList');
+    el.innerHTML = rows.map(function (r) {
+      var balls = r.numbers.map(function (num) {
+        return '<div class="ball-sm g' + groupOf(num) + '">' + num + '</div>';
+      }).join('');
+      return '<div class="recent-row">' +
+        '<div class="recent-meta"><span class="recent-round">' + r.round + '회</span><span class="recent-date">' + fmtDate(r.date) + '</span></div>' +
+        '<div class="recent-balls">' + balls + '<span class="recent-plus">+</span><div class="ball-sm bonus">' + r.bonus + '</div></div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderStats() {
+    var rows = currentWindowData();
+    var freq = computeFreq(rows);
+    document.getElementById('statsHint').textContent =
+      state.windowSize === 'all' ? '전체 1242회 기준' : '최근 ' + state.windowSize + '회 기준';
+    renderChart(freq.counts, freq.lastRound, rows.length);
+    renderChips(freq.counts);
+    renderTable(freq.counts, freq.lastRound);
+    return freq;
+  }
+
+  function weightedPick(counts) {
+    var pool = [];
+    for (var n = 1; n <= 45; n++) pool.push({ n: n, w: counts[n] + 1 });
+    var picked = [];
+    for (var k = 0; k < 6; k++) {
+      var total = pool.reduce(function (a,b) { return a + b.w; }, 0);
+      var r = Math.random() * total;
+      var acc = 0, idx = -1;
+      for (var i = 0; i < pool.length; i++) {
+        acc += pool[i].w;
+        if (r <= acc) { idx = i; break; }
+      }
+      if (idx === -1) idx = pool.length - 1;
+      picked.push(pool[idx].n);
+      pool.splice(idx, 1);
+    }
+    return picked.sort(function (a,b) { return a-b; });
+  }
+
+  function uniformPick() {
+    var pool = [];
+    for (var n = 1; n <= 45; n++) pool.push(n);
+    var picked = [];
+    for (var k = 0; k < 6; k++) {
+      var idx = Math.floor(Math.random() * pool.length);
+      picked.push(pool[idx]);
+      pool.splice(idx, 1);
+    }
+    return picked.sort(function (a,b) { return a-b; });
+  }
+
+  function renderTickets(counts) {
+    var el = document.getElementById('tickets');
+    var labels = ['A','B','C','D','E'];
+    var html = '';
+    for (var g = 0; g < state.gameCount; g++) {
+      var nums = state.mode === 'weighted' ? weightedPick(counts) : uniformPick();
+      html += '<div class="ticket-row"><span class="ticket-label">' + labels[g] + '</span><div class="balls">' +
+        nums.map(function (n) { return '<div class="ball g' + groupOf(n) + '">' + n + '</div>'; }).join('') +
+        '</div></div>';
+    }
+    el.innerHTML = html;
+  }
+
+  function wireControls() {
+    document.querySelectorAll('#modeRow .pill').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('#modeRow .pill').forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
+        this.setAttribute('aria-pressed', 'true');
+        state.mode = this.getAttribute('data-mode');
+      });
+    });
+    document.querySelectorAll('#gameCountRow .pill').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('#gameCountRow .pill').forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
+        this.setAttribute('aria-pressed', 'true');
+        state.gameCount = Number(this.getAttribute('data-count'));
+      });
+    });
+    document.querySelectorAll('#windowRow .pill').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('#windowRow .pill').forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
+        this.setAttribute('aria-pressed', 'true');
+        state.windowSize = this.getAttribute('data-window');
+        renderStats();
+      });
+    });
+    document.getElementById('generateBtn').addEventListener('click', function () {
+      var rows = currentWindowData();
+      var freq = computeFreq(rows);
+      renderTickets(freq.counts);
+    });
+  }
+
+  fetch('data.json')
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      state.data = data;
+      renderMeta();
+      renderLegend();
+      wireControls();
+      renderStats();
+      renderRecent();
+    })
+    .catch(function (err) {
+      document.getElementById('metaChip').textContent = '데이터 로드 실패';
+      console.error(err);
+    });
+})();
+</script>
